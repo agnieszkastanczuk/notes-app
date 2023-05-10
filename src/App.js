@@ -1,25 +1,58 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react";
+import NoteCreate from "./components/NoteCreate";
+import NoteList from "./components/NotesList";
+import 'animate.css';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [notes, setNotes] = useState([]);
+
+    useEffect(() => {
+        const storedNotes = localStorage.getItem("notes");
+        if (storedNotes) {
+            setNotes(JSON.parse(storedNotes));
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem("notes", JSON.stringify(notes));
+    }, [notes]);
+
+
+    const editNoteById = (id, newTitle) => {
+        const updatedNotes = notes.map((note) => {
+            if (note.id === id) {
+                return { ...note, title: newTitle };
+            }
+            return note;
+        });
+        setNotes(updatedNotes);
+    }
+
+    const deleteNoteById = (id) => {
+        const updatedNotes = notes.filter((note) => {
+            return note.id !== id;
+        });
+
+        setNotes(updatedNotes);
+    };
+
+    const createNote = (title) => {
+        const newNote = {
+            id: Math.round(Math.random() * 9999),
+            title,
+            createdAt: new Date().toLocaleString()
+        };
+        const updatedNotes = [...notes, newNote];
+        setNotes(updatedNotes);
+    };
+
+    return (
+        <div>
+            <h1 className="animate__animated animate__headShake">my NOTES</h1>
+            <NoteCreate onCreate={createNote} />
+            <NoteList onEdit={editNoteById} notes={notes} onDelete={deleteNoteById} />
+        </div>
+    );
 }
 
 export default App;
